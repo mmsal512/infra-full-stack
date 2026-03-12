@@ -10,7 +10,7 @@ on:
     branches: [main]
 
 env:
-  DOCKER_IMAGE: mmsal512/infra-full-stack
+  DOCKER_IMAGE: mohammed512/infra-full-stack
 
 jobs:
   test:

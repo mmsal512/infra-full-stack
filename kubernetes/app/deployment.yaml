@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
         - name: flask-app
-          image: mmsal512/infra-full-stack:latest
+          image: mohammed512/infra-full-stack:latest
           ports:
             - containerPort: 5000
               name: http

@@ -79,7 +79,7 @@ jobs:
             -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
             -d parse_mode="Markdown" \
             -d text="✅ *infra-full-stack Deployed!*
-          📦 Image: \`mmsal512/infra-full-stack:latest\`
+          📦 Image: \`mohammed512/infra-full-stack:latest\`
           🔢 Build: #${{ github.run_number }}
           👤 By: ${{ github.actor }}" || true
 
