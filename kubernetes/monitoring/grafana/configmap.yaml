@@ -1,0 +1,112 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: infra-full-stack
+data:
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus-service:9090
+        isDefault: true
+        editable: true
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards-provider
+  namespace: infra-full-stack
+data:
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-json
+  namespace: infra-full-stack
+data:
+  flask-app.json: |
+    {
+      "annotations": {"list": []},
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "links": [],
+      "panels": [
+        {
+          "title": "App Status",
+          "type": "stat",
+          "gridPos": {"h": 6, "w": 4, "x": 0, "y": 0},
+          "datasource": "Prometheus",
+          "targets": [{"expr": "up{job=\"flask-app\"}", "legendFormat": "{{instance}}"}],
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [{"options": {"0": {"text": "DOWN", "color": "red"}, "1": {"text": "UP", "color": "green"}}, "type": "value"}],
+              "thresholds": {"steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}
+            }
+          }
+        },
+        {
+          "title": "Total Requests",
+          "type": "stat",
+          "gridPos": {"h": 6, "w": 4, "x": 4, "y": 0},
+          "datasource": "Prometheus",
+          "targets": [{"expr": "sum(app_requests_total)", "legendFormat": "Total"}],
+          "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"steps": [{"color": "blue", "value": null}]}}}
+        },
+        {
+          "title": "Running Pods",
+          "type": "stat",
+          "gridPos": {"h": 6, "w": 4, "x": 8, "y": 0},
+          "datasource": "Prometheus",
+          "targets": [{"expr": "count(up{job=\"flask-app\"} == 1)", "legendFormat": "Pods"}],
+          "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"steps": [{"color": "green", "value": null}]}}}
+        },
+        {
+          "title": "App Uptime (seconds)",
+          "type": "stat",
+          "gridPos": {"h": 6, "w": 4, "x": 12, "y": 0},
+          "datasource": "Prometheus",
+          "targets": [{"expr": "max(app_uptime_seconds)", "legendFormat": "Uptime"}],
+          "fieldConfig": {"defaults": {"unit": "s"}}
+        },
+        {
+          "title": "App Up/Down Over Time",
+          "type": "timeseries",
+          "gridPos": {"h": 8, "w": 16, "x": 0, "y": 6},
+          "datasource": "Prometheus",
+          "targets": [{"expr": "up{job=\"flask-app\"}", "legendFormat": "{{instance}}"}],
+          "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"fillOpacity": 20}}}
+        },
+        {
+          "title": "Requests Over Time",
+          "type": "timeseries",
+          "gridPos": {"h": 8, "w": 16, "x": 0, "y": 14},
+          "datasource": "Prometheus",
+          "targets": [{"expr": "rate(app_requests_total[1m])", "legendFormat": "{{instance}}"}],
+          "fieldConfig": {"defaults": {"unit": "reqps"}}
+        }
+      ],
+      "refresh": "10s",
+      "schemaVersion": 39,
+      "tags": ["flask", "infra-full-stack"],
+      "templating": {"list": []},
+      "time": {"from": "now-1h", "to": "now"},
+      "title": "Infra Full Stack — Application Dashboard",
+      "uid": "infra-full-stack-app"
+    }

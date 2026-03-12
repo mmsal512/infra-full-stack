@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: infra-full-stack
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    rule_files:
+      - '/etc/prometheus/alert-rules.yml'
+
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+
+      - job_name: 'flask-app'
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: ['infra-full-stack']
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__meta_kubernetes_pod_ip, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            target_label: __address__
+            regex: (.+);(.+)
+            replacement: $1:$2
+
+      - job_name: 'kubernetes-pods'
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: ['infra-full-stack']
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+
+  alert-rules.yml: |
+    groups:
+      - name: flask-app-alerts
+        rules:
+          - alert: AppDown
+            expr: up{job="flask-app"} == 0
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Flask App is DOWN"
+              description: "Pod {{ $labels.instance }} has been down for over 1 minute"
+
+          - alert: HighRequestCount
+            expr: app_requests_total > 10000
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High request count detected"
+
+          - alert: PodRestart
+            expr: increase(kube_pod_container_status_restarts_total{namespace="infra-full-stack"}[1h]) > 3
+            for: 1m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Pod restarting frequently"

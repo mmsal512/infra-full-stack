@@ -1,0 +1,144 @@
+---
+# ============================================
+#  Ansible Playbook — Prepare K3s for infra-full-stack
+#  Target: Existing server with K3s already installed
+#  What it does:
+#    1. Verifies K3s is running
+#    2. Installs Helm (if not present)
+#    3. Creates the project namespace
+#    4. Applies Kubernetes manifests
+#    5. Verifies deployment
+# ============================================
+
+- name: Deploy infra-full-stack to K3s
+  hosts: k3s_server
+  become: yes
+  
+  vars:
+    project_name: infra-full-stack
+    project_namespace: infra-full-stack
+    project_dir: /home/mohammed/infra-full-stack
+    kubectl_cmd: k3s kubectl
+
+  tasks:
+    # ===== Pre-flight Checks =====
+    - name: Verify K3s is running
+      command: "{{ kubectl_cmd }} get nodes"
+      register: k3s_check
+      changed_when: false
+
+    - name: Show K3s status
+      debug:
+        msg: "{{ k3s_check.stdout_lines }}"
+
+    - name: Check available memory
+      shell: "free -m | awk '/^Mem:/ {print $7}'"
+      register: available_ram
+      changed_when: false
+
+    - name: Warn if low memory
+      debug:
+        msg: "⚠️ Available RAM: {{ available_ram.stdout }}MB — Proceeding carefully"
+      when: available_ram.stdout | int < 1024
+
+    # ===== Install Helm =====
+    - name: Check if Helm is installed
+      command: helm version --short
+      register: helm_check
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Install Helm
+      shell: curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      when: helm_check.rc != 0
+      args:
+        creates: /usr/local/bin/helm
+
+    # ===== Create Project Directory =====
+    - name: Create project directory
+      file:
+        path: "{{ project_dir }}"
+        state: directory
+        owner: mohammed
+        group: mohammed
+        mode: '0755'
+
+    # ===== Copy Kubernetes Manifests =====
+    - name: Copy kubernetes manifests
+      synchronize:
+        src: ../kubernetes/
+        dest: "{{ project_dir }}/kubernetes/"
+        recursive: yes
+
+    # ===== Deploy to K3s =====
+    - name: Create namespace
+      command: "{{ kubectl_cmd }} apply -f {{ project_dir }}/kubernetes/namespace.yaml"
+
+    - name: Apply Prometheus RBAC
+      command: "{{ kubectl_cmd }} apply -f {{ project_dir }}/kubernetes/monitoring/prometheus/clusterrole.yaml"
+
+    - name: Apply Prometheus config
+      command: "{{ kubectl_cmd }} apply -f {{ project_dir }}/kubernetes/monitoring/prometheus/configmap.yaml"
+
+    - name: Deploy Prometheus
+      command: "{{ kubectl_cmd }} apply -f {{ project_dir }}/kubernetes/monitoring/prometheus/deployment.yaml"
+
+    - name: Apply Grafana config
+      command: "{{ kubectl_cmd }} apply -f {{ project_dir }}/kubernetes/monitoring/grafana/configmap.yaml"
+
+    - name: Deploy Grafana
+      command: "{{ kubectl_cmd }} apply -f {{ project_dir }}/kubernetes/monitoring/grafana/deployment.yaml"
+
+    - name: Apply app ConfigMap
+      command: "{{ kubectl_cmd }} apply -f {{ project_dir }}/kubernetes/app/configmap.yaml"
+
+    - name: Deploy Flask app
+      command: "{{ kubectl_cmd }} apply -f {{ project_dir }}/kubernetes/app/deployment.yaml"
+
+    - name: Apply app Service
+      command: "{{ kubectl_cmd }} apply -f {{ project_dir }}/kubernetes/app/service.yaml"
+
+    - name: Apply HPA
+      command: "{{ kubectl_cmd }} apply -f {{ project_dir }}/kubernetes/app/hpa.yaml"
+
+    # ===== Wait & Verify =====
+    - name: Wait for Flask app pods
+      command: "{{ kubectl_cmd }} wait --for=condition=ready pod -l app=flask-app -n {{ project_namespace }} --timeout=120s"
+      register: app_ready
+
+    - name: Wait for Prometheus pod
+      command: "{{ kubectl_cmd }} wait --for=condition=ready pod -l app=prometheus -n {{ project_namespace }} --timeout=120s"
+      register: prom_ready
+
+    - name: Wait for Grafana pod
+      command: "{{ kubectl_cmd }} wait --for=condition=ready pod -l app=grafana -n {{ project_namespace }} --timeout=120s"
+      register: grafana_ready
+
+    - name: Show all pods in namespace
+      command: "{{ kubectl_cmd }} get pods -n {{ project_namespace }} -o wide"
+      register: all_pods
+      changed_when: false
+
+    - name: Show all services
+      command: "{{ kubectl_cmd }} get svc -n {{ project_namespace }}"
+      register: all_svc
+      changed_when: false
+
+    - name: Print deployment summary
+      debug:
+        msg: |
+          ══════════════════════════════════════════
+           ✅ infra-full-stack Deployed Successfully!
+          ══════════════════════════════════════════
+          
+          Pods:
+          {{ all_pods.stdout }}
+          
+          Services:
+          {{ all_svc.stdout }}
+          
+          Access (via Tailscale IP 100.126.131.64):
+            App:        http://100.126.131.64:30080
+            Prometheus: http://100.126.131.64:30090
+            Grafana:    http://100.126.131.64:30030
+          ══════════════════════════════════════════

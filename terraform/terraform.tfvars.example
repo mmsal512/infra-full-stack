@@ -1,0 +1,13 @@
+# ============================================
+#  Copy this file: cp terraform.tfvars.example terraform.tfvars
+#  Then fill in your values
+# ============================================
+
+hcloud_token         = "YOUR_HETZNER_API_TOKEN"
+server_name          = "infra-full-stack"
+server_type          = "cx22"               # 2 vCPU, 4GB RAM — ~€4.5/month
+server_location      = "nbg1"              # Nuremberg, Germany
+server_image         = "ubuntu-24.04"
+ssh_public_key_path  = "~/.ssh/id_ed25519.pub"
+ssh_private_key_path = "~/.ssh/id_ed25519"
+ssh_port             = 2026
