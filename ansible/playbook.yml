@@ -137,8 +137,8 @@
           Services:
           {{ all_svc.stdout }}
           
-          Access (via Tailscale IP 100.126.131.64):
-            App:        http://100.126.131.64:30080
-            Prometheus: http://100.126.131.64:30090
-            Grafana:    http://100.126.131.64:30030
+          Access (via Tailscale IP YOUR_TAILSCALE_IP):
+            App:        http://YOUR_TAILSCALE_IP:30080
+            Prometheus: http://YOUR_TAILSCALE_IP:30090
+            Grafana:    http://YOUR_TAILSCALE_IP:30030
           ══════════════════════════════════════════

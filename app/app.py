@@ -17,13 +17,14 @@ def home():
     return jsonify({
         "app": "infra-full-stack",
         "author": "Mohammed Alefari",
-        "version": os.getenv("APP_VERSION", "1.0.0"),
+        "version": os.getenv("APP_VERSION", "1.1.0"),
         "hostname": socket.gethostname(),
         "timestamp": datetime.datetime.now().isoformat(),
         "status": "running",
         "uptime_seconds": int(time.time() - start_time),
         "total_requests": request_count,
-        "message": "DevOps Portfolio — Terraform + K8s + CI/CD + Monitoring"
+        "message": "DevOps Portfolio — Terraform + K8s + CI/CD + Monitoring",
+        "last_updated": "2026-03-13"
     })
 
 @app.route('/health')

@@ -3,7 +3,7 @@ set -euo pipefail
 
 # ============================================================
 #  Setup infra-full-stack on EXISTING server
-#  Run this ON your Hostinger server (srv1262599)
+#  Run this ON your server
 #  This deploys into K3s namespace without touching Docker apps
 # ============================================================
 
@@ -101,10 +101,10 @@ $KUBECTL get pods -n infra-full-stack
 echo ""
 $KUBECTL get svc -n infra-full-stack
 echo ""
-echo "  🌐 Access via Tailscale (100.126.131.64):"
-echo "     App:        http://100.126.131.64:30080"
-echo "     Prometheus: http://100.126.131.64:30090"
-echo "     Grafana:    http://100.126.131.64:30030"
-echo "                 (admin / admin123)"
+echo "  🌐 Access via Tailscale (YOUR_TAILSCALE_IP):"
+echo "     App:        http://YOUR_TAILSCALE_IP:30080"
+echo "     Prometheus: http://YOUR_TAILSCALE_IP:30090"
+echo "     Grafana:    http://YOUR_TAILSCALE_IP:30030"
+echo "                 (admin / YOUR_PASSWORD)"
 echo ""
 echo "══════════════════════════════════════════════"

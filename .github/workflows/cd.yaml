@@ -16,11 +16,14 @@ jobs:
 
       - name: Deploy via SSH (Tailscale)
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
         with:
           host: ${{ secrets.SERVER_TAILSCALE_IP }}
           username: mohammed
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 2026
+          envs: GRAFANA_ADMIN_PASSWORD
           script: |
             set -e
             echo "══════════════════════════════════"
@@ -32,6 +35,12 @@ jobs:
             # Pull latest manifests
             cd /home/mohammed/infra-full-stack
             git pull origin main 2>/dev/null || true
+
+            # Create/Update Grafana secret
+            sudo k3s kubectl create secret generic grafana-secrets \
+              --namespace=infra-full-stack \
+              --from-literal=admin-password="$GRAFANA_ADMIN_PASSWORD" \
+              --dry-run=client -o yaml | sudo k3s kubectl apply -f -
 
             # Apply manifests
             sudo k3s kubectl apply -f kubernetes/namespace.yaml

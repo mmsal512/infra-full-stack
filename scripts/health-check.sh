@@ -4,7 +4,7 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-TAILSCALE_IP="100.126.131.64"
+TAILSCALE_IP="${TAILSCALE_IP:-YOUR_TAILSCALE_IP}"  # Set your Tailscale IP here or via env var
 
 echo "══════════════════════════════════"
 echo "  infra-full-stack Health Check"
