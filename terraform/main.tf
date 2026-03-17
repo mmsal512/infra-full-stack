@@ -37,7 +37,7 @@ resource "hcloud_firewall" "default" {
   }
 
   # Note: HTTP/HTTPS NOT opened — access via Cloudflare Tunnel
-  # This matches Mohammed's production architecture
+  # This matches the production architecture
 }
 
 # ============================================
@@ -55,7 +55,7 @@ resource "hcloud_server" "main" {
     environment = "production"
     managed_by  = "terraform"
     project     = "infra-full-stack"
-    owner       = "mohammed-alefari"
+    owner       = "admin"
   }
 
   connection {

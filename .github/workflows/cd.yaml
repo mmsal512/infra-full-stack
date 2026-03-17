@@ -20,9 +20,9 @@ jobs:
           GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
         with:
           host: ${{ secrets.SERVER_TAILSCALE_IP }}
-          username: mohammed
+          username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 2026
+          port: ${{ secrets.SERVER_PORT }}
           envs: GRAFANA_ADMIN_PASSWORD
           script: |
             set -e
@@ -33,7 +33,7 @@ jobs:
             export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
             # Pull latest manifests
-            cd /home/mohammed/infra-full-stack
+            cd $HOME/infra-full-stack
             git pull origin main 2>/dev/null || true
 
             # Create/Update Grafana secret
@@ -65,9 +65,9 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_TAILSCALE_IP }}
-          username: mohammed
+          username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 2026
+          port: ${{ secrets.SERVER_PORT }}
           script: |
             sleep 15
             for i in $(seq 1 6); do

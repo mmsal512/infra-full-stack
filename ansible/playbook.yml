@@ -17,7 +17,7 @@
   vars:
     project_name: infra-full-stack
     project_namespace: infra-full-stack
-    project_dir: /home/mohammed/infra-full-stack
+    project_dir: "{{ ansible_env.HOME | default('/opt') }}/infra-full-stack"
     kubectl_cmd: k3s kubectl
 
   tasks:
@@ -59,8 +59,8 @@
       file:
         path: "{{ project_dir }}"
         state: directory
-        owner: mohammed
-        group: mohammed
+        owner: "{{ ansible_user | default('root') }}"
+        group: "{{ ansible_user | default('root') }}"
         mode: '0755'
 
     # ===== Copy Kubernetes Manifests =====

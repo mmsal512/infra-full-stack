@@ -48,5 +48,5 @@ variable "ssh_private_key_path" {
 variable "ssh_port" {
   description = "Custom SSH port"
   type        = number
-  default     = 2026
+  default     = 22
 }

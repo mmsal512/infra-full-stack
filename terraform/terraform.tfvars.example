@@ -10,4 +10,4 @@ server_location      = "nbg1"              # Nuremberg, Germany
 server_image         = "ubuntu-24.04"
 ssh_public_key_path  = "~/.ssh/id_ed25519.pub"
 ssh_private_key_path = "~/.ssh/id_ed25519"
-ssh_port             = 2026
+ssh_port             = 22

@@ -16,7 +16,7 @@ log()  { echo -e "${GREEN}[✔]${NC} $1"; }
 info() { echo -e "${BLUE}[ℹ]${NC} $1"; }
 warn() { echo -e "${YELLOW}[⚠]${NC} $1"; }
 
-PROJECT_DIR="/home/mohammed/infra-full-stack"
+PROJECT_DIR="$HOME/infra-full-stack"
 KUBECTL="sudo k3s kubectl"
 
 echo ""

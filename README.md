@@ -325,6 +325,8 @@ CI Success (workflow_run)
 | `DOCKER_USERNAME` | DockerHub username | اسم مستخدم DockerHub |
 | `DOCKER_TOKEN` | DockerHub access token | رمز وصول DockerHub |
 | `SERVER_TAILSCALE_IP` | Server Tailscale IP | عنوان IP الخاص بـ Tailscale |
+| `SERVER_USERNAME` | Server SSH username | اسم المستخدم للسيرفر |
+| `SERVER_PORT` | Server SSH port | منفذ SSH للسيرفر |
 | `SSH_PRIVATE_KEY` | SSH private key | المفتاح الخاص SSH |
 | `GRAFANA_ADMIN_PASSWORD` | Grafana admin password | كلمة مرور Grafana |
 | `TELEGRAM_TOKEN` | Telegram Bot token | رمز بوت Telegram |
